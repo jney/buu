@@ -16,9 +16,9 @@ type debouncer struct {
 }
 
 func NewDebouncer(ctx context.Context, after time.Duration) *debouncer {
-	t := time.NewTimer(-1)
-	t.Stop()
-	d := &debouncer{after: after, done: make(chan struct{}, 1), timer: t}
+	timer := time.NewTimer(-1)
+	timer.Stop()
+	d := &debouncer{after: after, done: make(chan struct{}, 1), timer: timer}
 	go d.run(ctx)
 	return d
 }
@@ -59,10 +59,6 @@ func (d *debouncer) Add(fn func()) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 	d.added = true
-	if d.timer != nil {
-		d.timer.Reset(d.after)
-	} else {
-		d.timer.C = time.After(d.after)
-	}
+	d.timer.Reset(d.after)
 	d.fn = fn
 }

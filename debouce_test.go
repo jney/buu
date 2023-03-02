@@ -14,11 +14,11 @@ func TestNewDebouncer(t *testing.T) {
 		atomic.AddUint64(&counter, 1)
 	}
 	ctx := context.Background()
-	debounce := NewDebouncer(ctx, 80*time.Millisecond)
+	debouncer := NewDebouncer(ctx, 80*time.Millisecond)
 
 	for i := 0; i < 3; i++ {
 		for j := 0; j < 10; j++ {
-			debounce.Add(f)
+			debouncer.Add(f)
 		}
 		time.Sleep(100 * time.Millisecond)
 		// counter should be +1 only there
@@ -30,14 +30,14 @@ func TestNewDebouncer(t *testing.T) {
 		t.Errorf("debounced value should be 3 got %d", c)
 		t.FailNow()
 	}
-	debounce.Stop()
+	debouncer.Stop()
 
 	ctx, cancel := context.WithTimeout(ctx, time.Millisecond*190)
 	defer cancel()
 	counter = 0
-	debounce = NewDebouncer(ctx, 20*time.Millisecond)
+	debouncer = NewDebouncer(ctx, 20*time.Millisecond)
 	for i := 0; i < 10; i++ {
-		debounce.Add(f)
+		debouncer.Add(f)
 		time.Sleep(50 * time.Millisecond)
 		// counter should be +1 only there
 	}
@@ -48,4 +48,5 @@ func TestNewDebouncer(t *testing.T) {
 		t.Errorf("debounced value should be 4 got %d", c)
 		t.FailNow()
 	}
+	debouncer.Stop()
 }

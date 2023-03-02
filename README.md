@@ -8,11 +8,19 @@ The debouncer is partly based on https://github.com/bep/debounce.
 `context.Context` was added in order to ensure passed function would be called even if the program is stopped
 
 ```go
-debounce := NewDebouncer(context.Background(), 80*time.Millisecond)
-debounce(myFunc)
-debounce(myFunc)
+debouncer := NewDebouncer(context.Background(), 80*time.Millisecond)
+debouncer.Add(myFunc)
+debouncer.Add(myFunc)
 ```
+
+the debouncer **will run** the last function on `<-ctx.Done`
 
 ## Throttler
 
-TODO
+```go
+throttler := NewThrottler(context.Background(), 80*time.Millisecond)
+throttler.Add(myFunc)
+throttler.Add(myFunc)
+```
+
+the throttler **will not run** the queued functions on `<-ctx.Done`
