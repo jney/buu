@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type throttler struct {
+type Throttler struct {
 	after   time.Duration
 	done    chan struct{}
 	first   chan struct{}
@@ -17,10 +17,10 @@ type throttler struct {
 	timer   *time.Ticker
 }
 
-func NewThrottler(ctx context.Context, after time.Duration) *throttler {
+func NewThrottler(ctx context.Context, after time.Duration) *Throttler {
 	timer := time.NewTicker(after)
 	timer.Stop()
-	t := &throttler{
+	t := &Throttler{
 		after: after,
 		done:  make(chan struct{}, 1),
 		first: make(chan struct{}, 1), // run immediatly
@@ -32,7 +32,7 @@ func NewThrottler(ctx context.Context, after time.Duration) *throttler {
 	return t
 }
 
-func (t *throttler) exec() bool {
+func (t *Throttler) exec() bool {
 	if len(t.fns) == 0 {
 		return false
 	}
@@ -42,7 +42,7 @@ func (t *throttler) exec() bool {
 	return len(t.fns) != 0
 }
 
-func (t *throttler) run(ctx context.Context) {
+func (t *Throttler) run(ctx context.Context) {
 	defer func() {
 		t.done <- struct{}{}
 	}()
@@ -71,11 +71,11 @@ func (t *throttler) run(ctx context.Context) {
 	}
 }
 
-func (t *throttler) Done() <-chan struct{} { return t.done }
+func (t *Throttler) Done() <-chan struct{} { return t.done }
 
-func (t *throttler) Stop() { t.stop <- struct{}{} }
+func (t *Throttler) Stop() { t.stop <- struct{}{} }
 
-func (t *throttler) Add(fn func()) {
+func (t *Throttler) Add(fn func()) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	t.fns = append(t.fns, fn)
